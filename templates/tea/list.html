@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Tea with AI · {{ profile.name }}{% endblock %}
+{% block content %}
+<section class="container section">
+  <h1 class="display display--sm">Tea with AI</h1>
+  <p class="lede">Questions I asked, and what came back.</p>
+  {% if page.object_list %}
+    <div class="grid">
+      {% for exchange in page.object_list %}{% include "tea/_card.html" %}{% endfor %}
+    </div>
+    {% include "_pagination.html" %}
+  {% else %}
+    <p class="empty">The kettle is on. Conversations coming soon.</p>
+  {% endif %}
+</section>
+{% endblock %}

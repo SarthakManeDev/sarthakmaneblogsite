@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Blogs · {{ profile.name }}{% endblock %}
+{% block content %}
+<section class="container section">
+  <h1 class="display display--sm">Blogs</h1>
+
+  <form class="filters" method="get" role="search">
+    <input type="search" name="q" value="{{ filters.q }}" placeholder="Search" aria-label="Search blogs">
+    <select name="subject" aria-label="Subject">
+      <option value="">All subjects</option>
+      {% for s in subjects %}<option value="{{ s.slug }}" {% if filters.subject == s.slug %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+    </select>
+    <select name="language" aria-label="Language">
+      <option value="">All languages</option>
+      {% for code, name in languages %}<option value="{{ code }}" {% if filters.language == code %}selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+    <select name="length" aria-label="Length">
+      <option value="">Any length</option>
+      {% for code, name in lengths %}<option value="{{ code }}" {% if filters.length == code %}selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="button">Filter</button>
+    {% if querystring %}<a class="button button--ghost" href="{% url 'blog:list' %}">Clear</a>{% endif %}
+  </form>
+
+  {% if page.object_list %}
+    <div class="grid">
+      {% for post in page.object_list %}{% include "blog/_card.html" %}{% endfor %}
+    </div>
+    {% include "_pagination.html" %}
+  {% else %}
+    <p class="empty">No blogs match these filters yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

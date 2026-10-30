@@ -1,0 +1,30 @@
+{% extends "studio/object_list.html" %}
+{% block list %}
+{% if object_list %}
+<div class="book-admin">
+  {% for book in object_list %}
+  <div class="card book-admin__item">
+    <div class="card__body">
+      <div class="section__head">
+        <h2 class="card__title"><a href="{% url 'studio:book_update' book.pk %}">{{ book.title }}</a></h2>
+        <span class="pill pill--{{ book.status }}">{{ book.get_status_display }}</span>
+      </div>
+      <div class="progress"><span class="progress__bar" style="width: {{ book.percent }}%"></span></div>
+      <p class="meta">{{ book.percent }}% · page {{ book.current_page }} of {{ book.total_pages }}</p>
+      {% if book.status != "finished" %}
+      <form class="inline-form" method="post" action="{% url 'studio:book_progress' book.pk %}">
+        {% csrf_token %}
+        <label>Page <input type="number" name="current_page" min="0" max="{{ book.total_pages }}" value="{{ book.current_page }}" required></label>
+        <label class="grow">Note <input type="text" name="note" maxlength="240" value="{{ book.note }}"></label>
+        <button class="button" type="submit">Update</button>
+      </form>
+      {% endif %}
+      <p class="table__actions"><a href="{% url 'studio:book_update' book.pk %}">Edit</a> · <a href="{% url 'studio:book_delete' book.pk %}">Delete</a></p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty">No books yet. <a href="{% url 'studio:book_create' %}">Add the one you're reading →</a></p>
+{% endif %}
+{% endblock %}

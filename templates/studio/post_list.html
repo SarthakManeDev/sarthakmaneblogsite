@@ -1,0 +1,21 @@
+{% extends "studio/object_list.html" %}
+{% block list %}
+{% if object_list %}
+<table class="table">
+  <thead><tr><th>Title</th><th>Status</th><th>Published</th><th>Length</th><th></th></tr></thead>
+  <tbody>
+  {% for post in object_list %}
+    <tr>
+      <td><a href="{% url 'studio:post_update' post.pk %}">{{ post.title }}</a></td>
+      <td><span class="pill pill--{{ post.status }}">{{ post.get_status_display }}</span></td>
+      <td>{{ post.published_at|date:"j M Y H:i"|default:"—" }}</td>
+      <td>{{ post.reading_minutes }} min</td>
+      <td class="table__actions"><a href="{{ post.get_absolute_url }}" target="_blank" rel="noopener">View</a> · <a href="{% url 'studio:post_delete' post.pk %}">Delete</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No blogs yet. <a href="{% url 'studio:post_create' %}">Write the first one →</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+<article class="card post-card">
+  <a class="card__link" href="{{ post.get_absolute_url }}">
+    {% if post.cover %}<img class="post-card__cover" src="{{ post.cover.url }}" alt="" loading="lazy">{% endif %}
+    <div class="card__body">
+      <p class="meta">{{ post.published_at|date:"j M Y" }} · {{ post.reading_minutes }} min · {{ post.get_language_display }}</p>
+      <h3 class="card__title">{{ post.title }}</h3>
+      {% if post.excerpt %}<p class="card__text">{{ post.excerpt }}</p>{% endif %}
+      {% if post.subjects.all %}<p class="tags">{% for s in post.subjects.all %}<span class="tag">{{ s.name }}</span>{% endfor %}</p>{% endif %}
+    </div>
+  </a>
+</article>

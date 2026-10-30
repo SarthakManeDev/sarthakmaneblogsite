@@ -1,0 +1,31 @@
+{% extends "studio/base.html" %}
+{% load static %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} {{ label|lower }}{% endblock %}
+{% block content %}
+<p><a href="{{ list_url }}">← Back</a></p>
+<h1 class="display display--sm">{% if object %}Edit {{ label|lower }}{% else %}New {{ label|lower }}{% endif %}</h1>
+<form method="post" enctype="multipart/form-data" class="form form--wide">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
+  {% for field in form %}
+    <div class="field{% if field.errors %} field--error{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% if field.name == "body" %}
+        <div class="editor-toolbar">
+          <button type="button" class="button button--ghost" data-insert-image data-upload-url="{% url 'studio:upload_image' %}">Insert image</button>
+          <input type="file" accept="image/*" hidden data-image-input>
+          <span class="meta">Markdown: **bold**, *italic*, ## heading, &gt; quote, [link](https://…)</span>
+        </div>
+      {% endif %}
+      {{ field }}
+      {% if field.help_text %}<small class="help">{{ field.help_text }}</small>{% endif %}
+      {% for e in field.errors %}<small class="error">{{ e }}</small>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="form__actions">
+    <button class="button" type="submit">Save</button>
+    {% if object.get_absolute_url %}<a class="button button--ghost" href="{{ object.get_absolute_url }}" target="_blank" rel="noopener">Preview</a>{% endif %}
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/editor.js' %}" defer></script>{% endblock %}

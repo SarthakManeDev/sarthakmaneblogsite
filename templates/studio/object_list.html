@@ -1,0 +1,27 @@
+{% extends "studio/base.html" %}
+{% load studio_extras %}
+{% block title %}{{ plural }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'studio:dashboard' %}">← Studio</a></p>
+<div class="section__head">
+  <h1 class="display display--sm">{{ plural }}</h1>
+  <a class="button" href="{% url 'studio:'|add:prefix|add:'_create' %}">+ New</a>
+</div>
+{% block list %}
+{% if object_list %}
+<table class="table">
+  <thead><tr>{% for c in columns %}<th>{{ c|cut:"_"|capfirst }}</th>{% endfor %}<th></th></tr></thead>
+  <tbody>
+  {% for obj in object_list %}
+    <tr>
+      {% for c in columns %}<td>{% if forloop.first %}<a href="{% url 'studio:'|add:prefix|add:'_update' obj.pk %}">{{ obj|field_value:c|truncatechars:80 }}</a>{% else %}{{ obj|field_value:c }}{% endif %}</td>{% endfor %}
+      <td class="table__actions"><a href="{% url 'studio:'|add:prefix|add:'_delete' obj.pk %}">Delete</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nothing here yet.</p>
+{% endif %}
+{% endblock %}
+{% endblock %}

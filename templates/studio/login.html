@@ -1,0 +1,15 @@
+{% extends "studio/base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1 class="display display--sm">Sign in</h1>
+  <form method="post" class="form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<p class="error">Wrong username or password.</p>{% endif %}
+    <label>Username {{ form.username }}</label>
+    <label>Password {{ form.password }}</label>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="button" type="submit">Sign in</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% load site_extras %}
+<article class="card tea-card">
+  <a class="card__link" href="{{ exchange.get_absolute_url }}">
+    <div class="card__body">
+      <p class="meta">{{ exchange.asked_on|date:"j M Y" }}{% if exchange.ai_name %} · asked {{ exchange.ai_name }}{% endif %}</p>
+      <h3 class="card__title tea-card__question">{{ exchange.question }}</h3>
+      <div class="tea-card__answer">{{ exchange.answer|markdownify|striptags|truncatewords:120 }}</div>
+    </div>
+  </a>
+</article>

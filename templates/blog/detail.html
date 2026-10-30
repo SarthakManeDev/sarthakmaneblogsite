@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load site_extras %}
+{% block title %}{{ post.title }} · {{ profile.name }}{% endblock %}
+{% block description %}{{ post.excerpt|default:post.title }}{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_image %}{% if post.cover %}<meta property="og:image" content="{{ post.cover.url }}">{% endif %}{% endblock %}
+{% block content %}
+<article class="container article">
+  {% if not post.is_live %}<p class="notice">Draft preview — only you can see this.</p>{% endif %}
+  <header class="article__header">
+    <p class="meta">{{ post.published_at|date:"j F Y"|default:"Unpublished" }} · {{ post.reading_minutes }} min read · {{ post.get_language_display }}</p>
+    <h1 class="display display--article">{{ post.title }}</h1>
+    {% if post.excerpt %}<p class="lede">{{ post.excerpt }}</p>{% endif %}
+    {% if post.subjects.all %}<p class="tags">{% for s in post.subjects.all %}<a class="tag" href="{% url 'blog:list' %}?subject={{ s.slug }}">{{ s.name }}</a>{% endfor %}</p>{% endif %}
+  </header>
+  {% if post.cover %}<img class="article__cover" src="{{ post.cover.url }}" alt="">{% endif %}
+  <div class="prose">{{ post.body|markdownify }}</div>
+  <footer class="article__footer"><a href="{% url 'blog:list' %}">← All blogs</a></footer>
+</article>
+{% endblock %}

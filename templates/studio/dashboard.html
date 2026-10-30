@@ -1,0 +1,14 @@
+{% extends "studio/base.html" %}
+{% block content %}
+<h1 class="display display--sm">Hello, {{ user.first_name|default:user.username }}.</h1>
+<div class="grid studio-cards">
+  {% for card in cards %}
+    <a class="card studio-card{% if card.primary %} studio-card--primary{% endif %}" href="{{ card.url }}">
+      <div class="card__body">
+        <h2 class="card__title">{% if card.primary %}+ {% endif %}{{ card.title }}</h2>
+        <p class="card__text">{{ card.text }}</p>
+      </div>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

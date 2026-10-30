@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load site_extras %}
+{% block title %}About · {{ profile.name }}{% endblock %}
+{% block content %}
+<section class="container section about">
+  <h1 class="display display--sm">About</h1>
+  {% if photos %}
+  <div class="about__photos">
+    {% for photo in photos %}
+      <figure><img src="{{ photo.image.url }}" alt="{{ photo.caption|default:profile.name }}" loading="lazy">{% if photo.caption %}<figcaption>{{ photo.caption }}</figcaption>{% endif %}</figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="prose about__bio">{{ profile.bio|markdownify }}</div>
+  <dl class="contact">
+    {% if profile.email %}<div><dt>Email</dt><dd><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></dd></div>{% endif %}
+    {% if profile.instagram %}<div><dt>Instagram</dt><dd><a href="https://instagram.com/{{ profile.instagram }}" rel="me noopener">@{{ profile.instagram }}</a></dd></div>{% endif %}
+    {% if profile.phone %}<div><dt>Phone</dt><dd><a href="tel:{{ profile.phone|cut:' ' }}">{{ profile.phone }}</a></dd></div>{% endif %}
+    {% if profile.linkedin_url %}<div><dt>LinkedIn</dt><dd><a href="{{ profile.linkedin_url }}" rel="me noopener">Profile</a></dd></div>{% endif %}
+    {% if profile.github_url %}<div><dt>GitHub</dt><dd><a href="{{ profile.github_url }}" rel="me noopener">Profile</a></dd></div>{% endif %}
+    {% if profile.x_url %}<div><dt>X</dt><dd><a href="{{ profile.x_url }}" rel="me noopener">Profile</a></dd></div>{% endif %}
+  </dl>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "studio/base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<p><a href="{% url 'studio:dashboard' %}">← Studio</a></p>
+<h1 class="display display--sm">About page</h1>
+<form method="post" class="form form--wide">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="field{% if field.errors %} field--error{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+      {% if field.help_text %}<small class="help">{{ field.help_text }}</small>{% endif %}
+      {% for e in field.errors %}<small class="error">{{ e }}</small>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="form__actions"><button class="button" type="submit">Save</button></div>
+</form>
+
+<div class="section__head section">
+  <h2 class="section__title">Photos</h2>
+  <a class="button" href="{% url 'studio:photo_create' %}">+ Add photo</a>
+</div>
+<div class="about__photos">
+  {% for photo in photos %}
+    <figure><a href="{% url 'studio:photo_update' photo.pk %}"><img src="{{ photo.image.url }}" alt="{{ photo.caption }}"></a><figcaption><a href="{% url 'studio:photo_delete' photo.pk %}">Remove</a></figcaption></figure>
+  {% empty %}<p class="empty">No photos yet.</p>{% endfor %}
+</div>
+{% endblock %}

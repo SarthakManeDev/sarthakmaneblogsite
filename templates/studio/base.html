@@ -1,0 +1,32 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Studio{% endblock %} · {{ profile.name }}</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/studio.css' %}">
+</head>
+<body class="studio">
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="{% url 'studio:dashboard' %}">Studio</a>
+      {% if user.is_authenticated %}
+      <nav class="site-nav" aria-label="Studio">
+        <a href="{% url 'core:home' %}" target="_blank" rel="noopener">View site ↗</a>
+        <form method="post" action="{% url 'studio:logout' %}">{% csrf_token %}<button class="linklike" type="submit">Log out</button></form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <main class="container section">
+    {% if messages %}<ul class="messages">{% for m in messages %}<li class="message message--{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

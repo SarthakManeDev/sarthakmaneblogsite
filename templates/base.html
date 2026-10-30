@@ -1,0 +1,50 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ profile.name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ profile.tagline|default:profile.name }}{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ profile.name }}{% endblock %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  {% block og_image %}{% endblock %}
+  <link rel="alternate" type="application/rss+xml" title="Blog feed" href="{% url 'feed' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="{% url 'core:home' %}">{{ profile.name }}</a>
+      <nav class="site-nav" aria-label="Main">
+        {% for url_name, label in nav_items %}
+          {% url url_name as nav_url %}
+          <a href="{{ nav_url }}" {% if request.path == nav_url or nav_url != '/' and nav_url in request.path %}aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="site-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>© {% now "Y" %} {{ profile.name }}</span>
+      <span class="site-footer__links">
+        {% if profile.instagram %}<a href="https://instagram.com/{{ profile.instagram }}" rel="me noopener">Instagram</a>{% endif %}
+        {% if profile.email %}<a href="mailto:{{ profile.email }}">Email</a>{% endif %}
+        <a href="{% url 'feed' %}">RSS</a>
+      </span>
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

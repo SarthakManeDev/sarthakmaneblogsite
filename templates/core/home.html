@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block body_class %}page-home{% endblock %}
+{% block content %}
+<section class="hero container">
+  <div class="hero__shapes" aria-hidden="true">
+    <span class="shape shape--circle"></span><span class="shape shape--line"></span><span class="shape shape--dot"></span>
+  </div>
+  <h1 class="display">{{ profile.name }}</h1>
+  {% if profile.tagline %}<p class="lede">{{ profile.tagline }}</p>{% endif %}
+</section>
+
+{% if headlines %}
+<section class="container section">
+  <h2 class="section__title">Lately</h2>
+  <ul class="headlines">
+    {% for h in headlines %}
+      <li class="headline">
+        <time datetime="{{ h.date|date:'Y-m-d' }}">{{ h.date|date:"j M" }}</time>
+        {% if h.link %}<a href="{{ h.link }}">{{ h.text }}</a>{% else %}<span>{{ h.text }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if books or recently_finished %}
+<section class="container section">
+  <h2 class="section__title">On the nightstand</h2>
+  <div class="books">
+    {% for book in books %}
+      <div class="book">
+        {% if book.cover %}<img class="book__cover" src="{{ book.cover.url }}" alt="" loading="lazy">{% endif %}
+        <div class="book__info">
+          <p class="book__title">{{ book.title }}{% if book.author %} <span class="muted">— {{ book.author }}</span>{% endif %}</p>
+          <div class="progress" role="progressbar" aria-valuenow="{{ book.percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress for {{ book.title }}">
+            <span class="progress__bar" style="width: {{ book.percent }}%"></span>
+          </div>
+          <p class="meta">{{ book.percent }}% · page {{ book.current_page }} of {{ book.total_pages }}</p>
+          {% if book.note %}<p class="book__note">{{ book.note }}</p>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% if recently_finished %}
+    <p class="meta finished">Recently finished: {% for b in recently_finished %}<em>{{ b.title }}</em>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if media %}
+<section class="container section">
+  <h2 class="section__title">Moments</h2>
+  <div class="gallery">
+    {% for item in media %}
+      <figure class="gallery__item gallery__item--{{ item.kind }}">
+        {% if item.kind == "video" %}
+          {% if item.file %}
+            <video src="{{ item.file.url }}" controls preload="metadata" playsinline></video>
+          {% elif item.youtube_embed %}
+            <iframe src="{{ item.youtube_embed }}" title="{{ item.caption|default:'Video' }}" loading="lazy" allowfullscreen></iframe>
+          {% endif %}
+        {% elif item.file %}
+          <img src="{{ item.file.url }}" alt="{{ item.caption }}" loading="lazy">
+        {% endif %}
+        {% if item.caption %}<figcaption>{{ item.caption }}</figcaption>{% endif %}
+      </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if latest_posts %}
+<section class="container section">
+  <div class="section__head">
+    <h2 class="section__title">Writing</h2>
+    <a class="more" href="{% url 'blog:list' %}">All blogs →</a>
+  </div>
+  <div class="grid">
+    {% for post in latest_posts %}{% include "blog/_card.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if latest_tea %}
+<section class="container section">
+  <div class="section__head">
+    <h2 class="section__title">Tea with AI</h2>
+    <a class="more" href="{% url 'tea:list' %}">More conversations →</a>
+  </div>
+  <div class="grid grid--2">
+    {% for exchange in latest_tea %}{% include "tea/_card.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if not headlines and not books and not media and not latest_posts %}
+<section class="container section"><p class="empty">Things are brewing. Check back soon.</p></section>
+{% endif %}
+{% endblock %}

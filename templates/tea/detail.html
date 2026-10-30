@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load site_extras %}
+{% block title %}{{ exchange.question }} · Tea with AI{% endblock %}
+{% block og_title %}{{ exchange.question }}{% endblock %}
+{% block content %}
+<article class="container article">
+  <header class="article__header">
+    <p class="meta">Tea with AI · {{ exchange.asked_on|date:"j F Y" }}{% if exchange.ai_name %} · asked {{ exchange.ai_name }}{% endif %}</p>
+    <h1 class="display display--article">{{ exchange.question }}</h1>
+  </header>
+  <div class="prose">{{ exchange.answer|markdownify }}</div>
+  <footer class="article__footer"><a href="{% url 'tea:list' %}">← All conversations</a></footer>
+</article>
+{% endblock %}

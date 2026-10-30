@@ -1,0 +1,12 @@
+{% extends "studio/base.html" %}
+{% block title %}Delete{% endblock %}
+{% block content %}
+<div class="narrow">
+  <h1 class="display display--sm">Delete “{{ object }}”?</h1>
+  <p>This cannot be undone.</p>
+  <form method="post" class="form__actions">{% csrf_token %}
+    <button class="button button--danger" type="submit">Delete</button>
+    <a class="button button--ghost" href="{{ list_url }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}
