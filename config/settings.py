@@ -91,7 +91,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# DATABASE_URL, e.g. postgres://user:pass@host:5432/db?sslmode=require
+# DATABASE_URL, e.g. sqlite:////home/data/db.sqlite3 (Azure, cheapest) or
+# postgres://user:pass@host:5432/db?sslmode=require
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -99,6 +100,13 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"]["OPTIONS"] = {
+        # Wait for a lock instead of failing, and take the write lock up front
+        # so concurrent requests queue rather than error ("database is locked").
+        "timeout": 20,
+        "transaction_mode": "IMMEDIATE",
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -124,6 +132,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 AZURE_ACCOUNT_NAME = os.environ.get("AZURE_STORAGE_ACCOUNT_NAME")
 AZURE_ACCOUNT_KEY = os.environ.get("AZURE_STORAGE_ACCOUNT_KEY")
 AZURE_CONTAINER = os.environ.get("AZURE_STORAGE_CONTAINER", "media")
+# Private container for SQLite backups (see apps/core/backup.py).
+BACKUP_CONTAINER = os.environ.get("AZURE_BACKUP_CONTAINER", "backups")
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

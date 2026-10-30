@@ -3,8 +3,11 @@
 # Review the estimated cost in docs/AZURE.md before running.
 #
 # Prerequisites: Azure CLI (`az login` done), and a subscription selected.
-# Usage: bash infra/provision.sh
+# Usage: bash infra/provision.sh                 # SQLite (default, ~$14/month)
+#        DB_MODE=postgres bash infra/provision.sh  # + PostgreSQL (~$30/month)
 set -euo pipefail
+
+DB_MODE="${DB_MODE:-sqlite}"
 
 LOCATION="${LOCATION:-centralindia}"
 RG="${RG:-rg-sarthakmane}"
@@ -35,21 +38,32 @@ az webapp config set -g "$RG" -n "$APP" --generic-configurations '{"healthCheckP
 az resource update -g "$RG" --namespace Microsoft.Web --resource-type basicPublishingCredentialsPolicies \
   --name scm --parent "sites/$APP" --set properties.allow=true -o none
 
-echo "==> PostgreSQL Flexible Server (Burstable B1ms, 32 GB)"
-az postgres flexible-server create -g "$RG" -n "$PG" -l "$LOCATION" \
-  --tier Burstable --sku-name Standard_B1ms --storage-size 32 --version 16 \
-  --admin-user "$PG_ADMIN" --admin-password "$PG_PASSWORD" \
-  --public-access 0.0.0.0 --backup-retention 7 --high-availability Disabled --yes -o none
-az postgres flexible-server db create -g "$RG" -s "$PG" -d "$DB_NAME" -o none
+if [ "$DB_MODE" = "postgres" ]; then
+  echo "==> PostgreSQL Flexible Server (Burstable B1ms, 32 GB)"
+  az postgres flexible-server create -g "$RG" -n "$PG" -l "$LOCATION" \
+    --tier Burstable --sku-name Standard_B1ms --storage-size 32 --version 16 \
+    --admin-user "$PG_ADMIN" --admin-password "$PG_PASSWORD" \
+    --public-access 0.0.0.0 --backup-retention 7 --high-availability Disabled --yes -o none
+  az postgres flexible-server db create -g "$RG" -s "$PG" -d "$DB_NAME" -o none
+  DATABASE_URL="postgres://$PG_ADMIN:$PG_PASSWORD@$PG.postgres.database.azure.com:5432/$DB_NAME?sslmode=require"
+else
+  echo "==> Database: SQLite on the app's persistent /home storage"
+  DATABASE_URL="sqlite:////home/data/db.sqlite3"
+fi
 
 echo "==> Storage account for photos & videos"
 az storage account create -g "$RG" -n "$STORAGE" -l "$LOCATION" --sku Standard_LRS --kind StorageV2 \
   --access-tier Hot --min-tls-version TLS1_2 --allow-blob-public-access true -o none
 STORAGE_KEY=$(az storage account keys list -g "$RG" -n "$STORAGE" --query "[0].value" -o tsv)
 az storage container create --account-name "$STORAGE" --account-key "$STORAGE_KEY" -n media --public-access blob -o none
+# Private container for database backups; copies older than 30 days are deleted automatically.
+az storage container create --account-name "$STORAGE" --account-key "$STORAGE_KEY" -n backups --public-access off -o none
+az storage account management-policy create -g "$RG" --account-name "$STORAGE" -o none --policy '{
+  "rules": [{"enabled": true, "name": "expire-db-backups", "type": "Lifecycle",
+    "definition": {"filters": {"blobTypes": ["blockBlob"], "prefixMatch": ["backups/db/"]},
+      "actions": {"baseBlob": {"delete": {"daysAfterModificationGreaterThan": 30}}}}}]}'
 
 echo "==> App settings"
-DATABASE_URL="postgres://$PG_ADMIN:$PG_PASSWORD@$PG.postgres.database.azure.com:5432/$DB_NAME?sslmode=require"
 az webapp config appsettings set -g "$RG" -n "$APP" -o none --settings \
   SCM_DO_BUILD_DURING_DEPLOYMENT=true \
   DJANGO_DEBUG=0 \
@@ -62,7 +76,8 @@ az webapp config appsettings set -g "$RG" -n "$APP" -o none --settings \
   DATABASE_URL="$DATABASE_URL" \
   AZURE_STORAGE_ACCOUNT_NAME="$STORAGE" \
   AZURE_STORAGE_ACCOUNT_KEY="$STORAGE_KEY" \
-  AZURE_STORAGE_CONTAINER=media
+  AZURE_STORAGE_CONTAINER=media \
+  AZURE_BACKUP_CONTAINER=backups
 
 cat <<SUMMARY
 
@@ -70,7 +85,7 @@ Done. Keep these somewhere safe (a password manager):
   Web app:        https://$APP.azurewebsites.net
   Studio (admin): https://sarthakmane.in/$STUDIO_PATH/
   Django admin:   https://sarthakmane.in/$ADMIN_PATH/
-  Postgres:       $PG.postgres.database.azure.com  user=$PG_ADMIN  password=$PG_PASSWORD
+  Database:       $DATABASE_URL
 
 Next:
   1. GitHub repo -> Settings -> Secrets and variables -> Actions:
