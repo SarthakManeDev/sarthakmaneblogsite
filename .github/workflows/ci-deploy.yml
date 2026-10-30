@@ -12,9 +12,11 @@ jobs:
     env:
       DJANGO_DEBUG: "0"
       DJANGO_SECRET_KEY: ci-only-not-secret
+      # The test client speaks plain HTTP; production keeps the HTTPS redirect.
+      DJANGO_SECURE_SSL_REDIRECT: "0"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -28,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # App Service (Oryx) installs requirements.txt during deployment
       # because SCM_DO_BUILD_DURING_DEPLOYMENT=true is set on the app.
       - uses: azure/webapps-deploy@v3
